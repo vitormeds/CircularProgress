@@ -33,7 +33,6 @@ class CircularProgress: UIView {
         let label = UILabel()
         label.numberOfLines = 0
         label.font = UIFont.systemFont(ofSize: 16)
-        label.textColor = UIColor.blue
         label.textAlignment = NSTextAlignment.center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -57,13 +56,14 @@ class CircularProgress: UIView {
         progressLayer.strokeColor = progressColor.cgColor
         progressLayer.lineWidth = 10.0;
         progressLayer.strokeEnd = 0.0
+        progressLayer.strokeStart = 0.0
         layer.addSublayer(progressLayer)
         
         addSubview(progressLabel)
         progressLabel.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
         progressLabel.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
         progressLabel.widthAnchor.constraint(equalToConstant: 100).isActive = true
-        
+        progressLabel.textColor = trackColor
     }
     
     func setProgressWithAnimation(duration: TimeInterval, value: Float) {
@@ -89,6 +89,26 @@ class CircularProgress: UIView {
                     }
                 }
             }while(i < (value * 100))
+        }
+    }
+    
+    func setCountDownWithAnimation(duration: Double, value: Float) {
+        progressLayer.strokeStart = 1.0
+        let animation = CABasicAnimation(keyPath: "strokeStart")
+        animation.duration = duration
+        animation.fromValue = 0
+        animation.toValue = value
+        animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
+        progressLayer.strokeEnd = CGFloat(value)
+        progressLayer.add(animation, forKey: "animateCircle")
+        var runCount = 0.0
+        self.progressLabel.text = Int(duration).description
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { timer in
+            runCount += 1
+            self.progressLabel.text = Int(duration - runCount).description
+            if runCount == duration {
+                timer.invalidate()
+            }
         }
     }
     
